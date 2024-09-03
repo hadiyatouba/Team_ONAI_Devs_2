@@ -1,0 +1,213 @@
+openapi: 3.0.0
+info:
+  title: API Documentation
+  version: 1.0.0
+paths:
+  /v1/articles:
+    get:
+      summary: Get a list of articles
+      responses:
+        '200':
+          description: A list of articles
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Article'
+    post:
+      summary: Create a new article
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Article'
+      responses:
+        '201':
+          description: Article created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Article'
+  /v1/articles/{id}:
+    get:
+      summary: Get a specific article
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Article details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Article'
+        '404':
+          description: Article not found
+    put:
+      summary: Update an existing article
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Article'
+      responses:
+        '200':
+          description: Article updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Article'
+        '404':
+          description: Article not found
+    delete:
+      summary: Delete an existing article
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Article deleted successfully
+        '404':
+          description: Article not found
+  /v1/articles/trashed:
+    get:
+      summary: Get a list of trashed articles
+      responses:
+        '200':
+          description: A list of trashed articles
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Article'
+  /v1/articles/{id}/restore:
+    patch:
+      summary: Restore a trashed article
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Article restored successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Article'
+        '404':
+          description: Article not found
+  /v1/articles/libelle:
+    post:
+      summary: Get an article by its libelle
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                libelle:
+                  type: string
+      responses:
+        '200':
+          description: Article with specified libelle
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Article'
+        '404':
+          description: Article not found
+  /v1/articles/{id}/force-delete:
+    delete:
+      summary: Force delete a trashed article
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Article permanently deleted
+        '404':
+          description: Article not found
+  /v1/articles/stock:
+    post:
+      summary: Update multiple articles
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                articles:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      stock:
+                        type: integer
+      responses:
+        '200':
+          description: Articles updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  updated_articles:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Article'
+                  failed_updates:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        article_data:
+                          type: object
+                        error_message:
+                          type: string
+        '422':
+          description: Validation error
+        '500':
+          description: Internal server error
+
+components:
+  schemas:
+    Article:
+      type: object
+      properties:
+        id:
+          type: integer
+        libelle:
+          type: string
+        stock:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time

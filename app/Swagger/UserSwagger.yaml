@@ -1,0 +1,207 @@
+openapi: 3.0.0
+info:
+  title: User API
+  description: API pour gérer les utilisateurs
+  version: 1.0.0
+tags:
+  - name: User
+    description: Opérations liées aux utilisateurs
+
+paths:
+  /users:
+    get:
+      tags:
+        - User
+      summary: Liste tous les utilisateurs
+      parameters:
+        - name: active
+          in: query
+          description: Filtrer par statut actif
+          required: false
+          schema:
+            type: string
+            enum:
+              - oui
+              - non
+        - name: role
+          in: query
+          description: Filtrer par nom de rôle
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Liste des utilisateurs récupérée avec succès
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        '403':
+          description: Permission refusée
+        '404':
+          description: Rôle spécifié n'existe pas
+
+    post:
+      tags:
+        - User
+      summary: Crée un nouvel utilisateur
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nom:
+                  type: string
+                  example: "Doe"
+                prenom:
+                  type: string
+                  example: "John"
+                login:
+                  type: string
+                  example: "johndoe"
+                password:
+                  type: string
+                  example: "password123"
+                role_id:
+                  type: integer
+                  example: 1
+                photo:
+                  type: string
+                  format: binary
+                etat:
+                  type: string
+                  enum:
+                    - ACTIF
+                    - INACTIF
+                  example: "ACTIF"
+      responses:
+        '201':
+          description: Utilisateur créé avec succès
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '403':
+          description: Permission refusée
+        '400':
+          description: Erreur de validation
+
+  /users/{userId}:
+    get:
+      tags:
+        - User
+      summary: Récupère les détails d'un utilisateur
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: ID de l'utilisateur
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Utilisateur récupéré avec succès
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '403':
+          description: Permission refusée
+        '404':
+          description: Utilisateur non trouvé
+
+    put:
+      tags:
+        - User
+      summary: Met à jour les détails d'un utilisateur
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: ID de l'utilisateur
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nom:
+                  type: string
+                prenom:
+                  type: string
+                login:
+                  type: string
+                password:
+                  type: string
+                role_id:
+                  type: integer
+                photo:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Utilisateur mis à jour avec succès
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '403':
+          description: Permission refusée
+        '404':
+          description: Utilisateur non trouvé
+
+    delete:
+      tags:
+        - User
+      summary: Supprime un utilisateur
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: ID de l'utilisateur
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Utilisateur supprimé avec succès
+        '403':
+          description: Permission refusée
+        '404':
+          description: Utilisateur non trouvé
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        nom:
+          type: string
+          example: "Doe"
+        prenom:
+          type: string
+          example: "John"
+        login:
+          type: string
+          example: "johndoe"
+        role_id:
+          type: integer
+          example: 1
+        photo:
+          type: string
+          format: binary
+        etat:
+          type: string
+          enum:
+            - ACTIF
+            - INACTIF
+          example: "ACTIF"
