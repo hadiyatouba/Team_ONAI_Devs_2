@@ -4,26 +4,25 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
-use App\Helpers\ResponseHelper;
 use App\Facades\UserServiceFacade as UserService;
 use App\Enums\EtatEnum;
 
 class UserController extends Controller
 {
-    public function __construct()
-    {
-        $this->authorizeResource(User::class, 'user');
-    }
+    // public function __construct()
+    // {
+    //     $this->authorizeResource(User::class, 'user');
+    // }
     
     public function index(Request $request)
     {
         $users = UserService::getAllUsers($request);
         
         if ($users === null) {
-            return ResponseHelper::sendOk(null, 'Le rôle spécifié n\'existe pas');
+            abort(404, 'Le rôle spécifié n\'existe pas');
         }
         
-        return ResponseHelper::sendOk($users, 'Liste des utilisateurs récupérée avec succès');
+        return $users;
     }
 
     public function store(Request $request)
@@ -46,17 +45,19 @@ class UserController extends Controller
 
         try {
             $user = UserService::createUser($data);
+            return response($user, 201);
         } catch (\Exception $e) {
-            return ResponseHelper::sendServerError('Erreur lors de la création de l\'utilisateur: ' . $e->getMessage());
+            abort(500, 'Erreur lors de la création de l\'utilisateur: ' . $e->getMessage());
         }
-
-        return ResponseHelper::sendCreated($user, 'Utilisateur créé avec succès');
     }
 
     public function show(int $id)
     {
         $user = UserService::getUserById($id);
-        return ResponseHelper::sendOk($user, 'Utilisateur récupéré avec succès');
+        if (!$user) {
+            abort(404);
+        }
+        return $user;
     }
 
     public function update(Request $request, User $user)
@@ -77,13 +78,12 @@ class UserController extends Controller
         }
 
         $updatedUser = UserService::updateUser($user, $data);
-
-        return ResponseHelper::sendOk($updatedUser, 'Utilisateur mis à jour avec succès');
+        return $updatedUser;
     }
 
     public function destroy(User $user)
     {
         UserService::deleteUser($user);
-        return ResponseHelper::sendOk(null, 'Utilisateur supprimé avec succès');
+        return response(null, 204);
     }
 }

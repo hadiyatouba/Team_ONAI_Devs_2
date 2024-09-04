@@ -2,14 +2,16 @@
 
 namespace App\Services;
 
-use App\Services\Interfaces\ClientServiceInterface;
-use App\Repositories\Interfaces\ClientRepositoryInterface;
-use Illuminate\Http\Request;
-use App\Models\Client;
 use App\Models\User;
+use App\Models\Client;
+use App\Enums\EtatEnum;
+use Illuminate\Http\Request;
+use GuzzleHttp\Psr7\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use App\Enums\EtatEnum;
+use App\Facades\UploadFacade as Upload;
+use App\Services\Interfaces\ClientServiceInterface;
+use App\Repositories\Interfaces\ClientRepositoryInterface;
 
 class ClientService implements ClientServiceInterface
 {
@@ -20,14 +22,33 @@ class ClientService implements ClientServiceInterface
         $this->clientRepository = $clientRepository;
     }
 
+    public function getClientById(string $id)
+    {
+        $client = $this->clientRepository->getClientById($id);
+        if ($client && $client->user && $client->user->photo) {
+            $client->user->photo_base64 = Upload::getBase64Photo($client->user->photo);
+        }
+        return $client;
+    }
+
     public function getAllClients(Request $request)
     {
-        return $this->clientRepository->getAllClients($request);
+        $clients = $this->clientRepository->getAllClients($request);
+        foreach ($clients as $client) {
+            if ($client->user && $client->user->photo) {
+                $client->user->photo_base64 = Upload::getBase64Photo($client->user->photo);
+            }
+        }
+        return $clients;
     }
 
     public function createClient(array $data)
     {
         return DB::transaction(function () use ($data) {
+            if (isset($data['user']['photo']) && $data['user']['photo'] instanceof UploadedFile) {
+                $data['user']['photo'] = Upload::uploadPhoto($data['user']['photo'], 'clients');
+            }
+
             $client = $this->clientRepository->createClient($data);
 
             if (isset($data['user'])) {
@@ -44,10 +65,10 @@ class ClientService implements ClientServiceInterface
         });
     }
 
-    public function getClientById(string $id)
-    {
-        return $this->clientRepository->getClientById($id);
-    }
+    // public function getClientById(string $id)
+    // {
+    //     return $this->clientRepository->getClientById($id);
+    // }
 
     public function updateClient(Client $client, array $data)
     {

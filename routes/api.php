@@ -14,13 +14,13 @@ Route::prefix('v1')->group(function () {
     
     // Routes protégées pour les utilisateurs
     Route::apiResource('/users', UserController::class);
-    
+
     // Routes protégées par auth:api et blacklisted
     Route::middleware(['auth:api', 'blacklisted'])->group(function () {
-        Route::post('/logout', [AuthController::class, 'logout']);
         Route::get('/user', function (Request $request) {
             return $request->user();
         });
+        Route::post('/logout', [AuthController::class, 'logout']);
 
         
         // Routes pour les clients

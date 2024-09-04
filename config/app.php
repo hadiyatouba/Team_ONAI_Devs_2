@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Facade;
 use Illuminate\Support\ServiceProvider;
 
+
 return [
 
     /*
@@ -171,6 +172,7 @@ return [
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
+        App\Providers\UploadServiceProvider::class,
     ])->toArray(),
 
     /*
@@ -185,6 +187,8 @@ return [
     */
 
     'aliases' => Facade::defaultAliases()->merge([
+        'Upload' => App\Facades\UploadFacade::class,
+
         // 'Example' => App\Facades\Example::class,
     ])->toArray(),
 

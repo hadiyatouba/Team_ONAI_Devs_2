@@ -30,19 +30,19 @@ class StoreClientRequest extends FormRequest
      */
     public function rules(): array
     {
-        $rules = [
-            'surname' => ['required', 'string', 'max:255','unique:clients,surname'],
-            'address' => ['string', 'max:255'],
-            'telephone' => ['required',new TelephoneRule()],
-
-            'user' => ['sometimes','array'],
-            'user.nom' => ['required_with:user','string'],
-            'user.prenom' => ['required_with:user','string'],
-            'user.login' => ['required_with:user','string'],
-            'user.role_id' => ['required_with:user', 'numeric', 'exists:roles,id'],
-            'user.password' => ['required_with:user', new CustumPasswordRule(),'confirmed'],
-            'photo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'], 
-            'etat' => ['string', 'in:' . implode(',', array_map(fn($case) => $case->value, EtatEnum::cases()))],
+        return [
+            'surname' => 'required|string|max:255|unique:clients,surname',
+            'telephone' => ['required', new TelephoneRule()],
+            'addresse' => 'nullable|string|max:255',
+            'photo' => 'required|image|mimes:jpeg,png,svg|max:40', // Photo obligatoire, max 40 ko, formats autorisés : jpeg, png, svg
+            // Validation pour l'utilisateur
+            'user.nom' => 'required_with:user|string|max:255',
+            'user.prenom' => 'required_with:user|string|max:255',
+            'user.login' => 'required_with:user|string|unique:users,login|max:255',
+            'user.password' => 'required_with:user|string|min:6|confirmed',
+            'user.role_id' => 'required_with:user|exists:roles,id',
+            'user.photo' => 'required_with:user|image|mimes:jpeg,png,svg|max:40', // Même validation pour la photo de l'utilisateur
+            'user.etat' => 'required|string|in:' . implode(',', array_map(fn($case) => $case->value, EtatEnum::cases())),
         ];
 /*
         if ($this->filled('user')) {

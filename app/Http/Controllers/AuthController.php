@@ -3,8 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use App\Enums\StateEnum;
-use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use App\Models\BlacklistedToken;
@@ -12,7 +10,6 @@ use App\Interfaces\AuthentificationServiceInterface;
 
 class AuthController extends Controller
 {
-    //Dépendance Injection 
     protected $authService;
 
     public function __construct(AuthentificationServiceInterface $authService)
@@ -29,11 +26,11 @@ class AuthController extends Controller
 
         $result = $this->authService->authenticate($request->only('login', 'password'));
 
-        if ($result) {
-            return $this->sendResponse($result, StateEnum::SUCCESS, 'Connexion réussie');
+        if (!$result) {
+            abort(401, 'Les identifiants sont incorrects');
         }
 
-        return $this->sendResponse(null, StateEnum::ECHEC, 'Les identifiants sont incorrects', 401);
+        return $result;
     }
 
     public function refresh(Request $request)
@@ -44,16 +41,13 @@ class AuthController extends Controller
     
         $user = User::where('refresh_token', $request->refresh_token)->first();
         if (!$user) {
-            return $this->sendResponse(null, StateEnum::ECHEC, 'Refresh token invalide', 401);
+            abort(401, 'Refresh token invalide');
         }
     
-        // Ajouter l'ancien refresh token à la liste noire
         BlacklistedToken::create(['token' => $request->refresh_token, 'type' => 'refresh']);
     
-        // Révoquer les anciens tokens
         $this->authService->revokeTokens($user);
-        $tokens = $this->authService->generateTokens($user);
-        return $this->sendResponse($tokens, StateEnum::SUCCESS, 'Token rafraîchi avec succès');
+        return $this->authService->generateTokens($user);
     }
 
     public function logout(Request $request)
@@ -69,15 +63,6 @@ class AuthController extends Controller
         }
 
         $this->authService->logout();
-        return $this->sendResponse(null, StateEnum::SUCCESS, 'Déconnexion réussie');
-    }
-
-    private function sendResponse($data, $status, $message, $httpStatus = 200)
-    {
-        return response()->json([
-            'data'    => $data,
-            'status'  => $status,
-            'message' => $message,
-        ], $httpStatus);
+        return response(null, 204);
     }
 }

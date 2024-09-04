@@ -31,11 +31,11 @@ class StoreUserRequest extends FormRequest
         return [
             'nom' => 'required|string|max:255',
             'prenom' => 'required|string|max:255',
-            'login' => 'required|string|unique:users|max:255',
-            'role_id' => 'required|numeric|exists:roles,id',
-            'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', 
+            'login' => 'required|string|unique:users,login|max:255',
+            'role_id' => 'required|exists:roles,id',
+            'photo' => 'required|image|mimes:jpeg,png,svg|max:40', // Photo obligatoire, max 40 ko, formats autorisés : jpeg, png, svg
             'etat' => 'required|string|in:' . implode(',', array_map(fn($case) => $case->value, EtatEnum::cases())),
-            'password' =>['confirmed', new CustumPasswordRule()],
+            'password' => 'required|string|min:6|confirmed',
         ];
     }
 

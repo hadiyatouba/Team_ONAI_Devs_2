@@ -15,8 +15,9 @@ class Client extends Model
         'surname',
         'adresse',
         'telephone',
-        'user_id'
-    ];
+        'user_id',
+        'photo', // Ajout de la photo
+    ];    
 
     protected $hidden = [
         'created_at',
