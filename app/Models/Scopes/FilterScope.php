@@ -16,6 +16,8 @@ class FilterScope implements Scope
     {
         $this->filters = $filters;
     }
+
+    
    
     public function apply(Builder $builder, Model $model)
     {

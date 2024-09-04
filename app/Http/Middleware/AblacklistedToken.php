@@ -37,15 +37,6 @@ class AblacklistedToken
         return $next($request);
     }
 
-    // public function handle(Request $request, Closure $next)
-    // {
-    //     $token = $request->bearerToken();
-
-    //     if ($token && BlacklistedToken::where('token', $token)->exists()) {
-    //         return response()->json(['message' => 'Token is blacklisted'], 401);
-    //     }
-
-    //     return $next($request);
-    // }
+  
 }
 

@@ -16,7 +16,7 @@ class Client extends Model
         'adresse',
         'telephone',
         'user_id',
-        'photo', // Ajout de la photo
+        'photo', 
     ];    
 
     protected $hidden = [
